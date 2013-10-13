@@ -1,0 +1,47 @@
+{
+  "name": "grunt-reverse",
+  "description": "Deconstruct HTML pages and turn them into layouts, includes, components and data files.",
+  "version": "0.1.0",
+  "homepage": "https://github.com/upstage/grunt-reverse",
+  "author": {
+    "name": "Jon Schlinkert",
+    "url": "https://github.com/jonschlinkert"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/upstage/grunt-reverse.git"
+  },
+  "bugs": {
+    "url": "https://github.com/upstage/grunt-reverse/issues"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/upstage/grunt-reverse/blob/master/LICENSE-MIT"
+    }
+  ],
+  "main": "tasks/reverse.js",
+  "dependencies": {
+    "cheerio": "~0.12.3"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "js-prettify": "~1.4.0"
+  },
+  "keywords": [
+    "assemble",
+    "bootstrap",
+    "css",
+    "less",
+    "framework",
+    "library",
+    "reverse engineer",
+    "static site generator",
+    "yeoman static site generator",
+    "grunt static site generator",
+    "site generator",
+    "component generator",
+    "blog generator",
+    "templates"
+  ]
+}
