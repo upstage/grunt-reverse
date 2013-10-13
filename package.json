@@ -1,7 +1,7 @@
 {
   "name": "grunt-reverse",
   "description": "Deconstruct HTML pages and turn them into layouts, includes, components and data files.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "homepage": "https://github.com/upstage/grunt-reverse",
   "author": {
     "name": "Jon Schlinkert",
@@ -29,6 +29,8 @@
     "js-prettify": "~1.4.0"
   },
   "keywords": [
+    "gruntplugin",
+    "grunt task",
     "assemble",
     "bootstrap",
     "css",
