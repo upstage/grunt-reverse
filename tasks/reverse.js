@@ -124,6 +124,8 @@ module.exports = function (grunt) {
 
           async.forEach(options.tags, function(tag, next) {
             data[tag] = data[tag] || [];
+            var content = '';
+
             $(tag).map(function(i, element) {
               console.log($(this));
               grunt.log.ok('element:'.yellow, tag);
@@ -144,13 +146,14 @@ module.exports = function (grunt) {
 
               // Push metadata into data array
               data[tag].push(metadata);
+              content += html;
             });
 
             // Data
 
             // HTML sections
-            var destpath = path.join(dest, basename, tag.name + '.hbs');
-            grunt.file.write(destpath, Utils.format($(this).html(), Utils.sep(name)));
+            var destpath = path.join(dest, basename, tag + '.hbs');
+            grunt.file.write(destpath, Utils.format(content, Utils.sep(name)));
 
             next();
           });
