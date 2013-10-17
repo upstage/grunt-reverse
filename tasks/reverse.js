@@ -42,8 +42,6 @@ module.exports = function (grunt) {
       return cb();
     }
 
-    var data = [];
-
     grunt.util.async.forEachSeries(files, function(fp, callback) {
       var dest = fp.dest;
       var src = fp.dest;
@@ -124,6 +122,7 @@ module.exports = function (grunt) {
 
 
           async.forEach(options.tags, function(tag, next) {
+            var data = [];
             $(tag).map(function(i, element) {
               console.log($(this));
               grunt.log.ok('element:'.yellow, tag);
@@ -147,7 +146,7 @@ module.exports = function (grunt) {
             });
 
             // Data
-            grunt.file.write(path.join(path.dirname(files.dest), tag.name + '.json'), JSON.stringify(data, null, 2));
+            grunt.file.write(path.join(dest, basename, tag + '.json'), JSON.stringify(data, null, 2));
             grunt.log.ok('Data file generated in'.yellow, path.join(dest, basename));
 
             // HTML sections
