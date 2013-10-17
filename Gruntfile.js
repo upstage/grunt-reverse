@@ -12,34 +12,42 @@ module.exports = function(grunt) {
 
   // Project configuration.
   grunt.initConfig({
-     reverse: {
+
+    jshint: {
+      options: {jshintrc: '.jshintrc'},
+      all: {
+        src: ['Gruntfile.js', 'tasks/**/*.js']
+      }
+    },
+
+    reverse: {
       options: {
         ext: 'hbs',
-        layout: 'default',
+        layout: 'default'
       },
-      includes: {
+      bootstrap: {
         options: {
-          parent: '.bs-example',
-          components: ['btn', 'popover']
+          parent: 'bs-example'
         },
         files: {
-          'tmp/reverse/includes/': ['_demo/*.html']
+          'tmp/reverse/': ['_demo/**/*.html']
         }
       },
-      sections: {
+      tags: {
         options: {
-          tags: ['head', 'footer']
+          tags: ['head', 'footer', 'title']
         },
         files: {
-          'tmp/reverse/sections/': ['_demo/*.html']
+          'tmp/reverse/tags/': ['_demo/**/*.html']
         }
       }
     }
   });
 
+  grunt.loadNpmTasks('grunt-contrib-jshint');
 
   // These plugins provide necessary tasks.
   grunt.loadTasks('tasks');
 
-  grunt.registerTask('default', ['reverse']);
+  grunt.registerTask('default', ['jshint', 'reverse']);
 };

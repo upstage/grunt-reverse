@@ -1,5 +1,5 @@
 /*!
- * Upstage Component Builder: Prettify
+ * Upstage Component Builder: Reverse
  * http://github.com/upstage/upstage
  *
  * Copyright 2013 Sellside, Inc.
@@ -12,48 +12,79 @@
 var path = require('path');
 
 
-var padcomments = function(str) {
-  return str.replace(/(\s*<!--)/g, '\n$1');
-}
-
 /**
  * Prettify HTML
  */
-var prettify = function(src) {
-  return require('js-prettify').html(src, {
+var prettify = function(str) {
+  return require('js-prettify').html(str, {
     indent_size: 2,
     indent_inner_html: true,
     unformatted: ['code', 'pre', 'em', 'strong']
-  }).replace(/(\r\n|\n\r|\n|\r){2,}/g, '\n').replace(/<\/a>\s*<\/li>/g, '</a> </li>');
+  });
+};
+
+exports.stripWhitespace = function(str) {
+  return str.replace(/^\s*/, '').replace(/\s*$/, '');
+};
+
+var collapseli = function(str) {
+  return str.replace(/<\/a>\s*<\/li>/g, '</a> </li>');
+};
+
+// Add a newline above each code comment.
+var padcomments = function(str) {
+  return str.replace(/(\s*<!--)/g, '\n$1');
+};
+
+// Remove superfluous whitespace
+var condense = function(str) {
+  return str.replace(/(\r\n|\n\r|\n|\r){2,}/g, '\n');
+};
+
+// If one exists, lop the first empty line off the top of a file.
+var shave = function(str) {
+  return str.replace(/^\s*/g, '');
+};
+
+var fixClosingComments = function(str) {
+  return str.replace(/\s*(<!--\s*\/.+)/g, '$1');
+};
+
+var padComponents = function(str) {
+  return str.replace(/^<(?:(?!\/))/gm, '\n<');
 };
 
 /**
  * Format generated HTML
  * @param  {String} src       Unformatted HTML
  * @param  {String} separator The separator to use between sections of joined content.
- * @return {String}     
+ * @return {String}
  */
-exports.format = function(src, separator) {
-  separator = separator || '';
-  return padcomments(separator + prettify(src)).replace(/^\s*/g, '');
+exports.format = function(src, sep) {
+  src = prettify(src);
+  src = condense(src);
+  src = padcomments(src);
+  src = padComponents(src, sep);
+  src = shave(src);
+  return fixClosingComments(src);
 };
 
 /**
  * Default separator
  */
 exports.sep = function(str) {
-  return '<!-- ' + str + '-->\n';
-}
+  return '<!--  ' + str + '  -->\n';
+};
 
 /**
- * Create an array of strings that match the 
+ * Create an array of strings that match the
  * given regex pattern.
- * @param  {RegExp} regex 
- * @param  {String} src   
- * @return {Array}       
+ * @param  {RegExp} regex
+ * @param  {String} src
+ * @return {Array}
  */
 exports.patternArray = function(regex, src) {
-  src = require('grunt').file.read(src);
+  // src = require('grunt').file.read(src);
   var match;
   var matches = [];
   while (match = regex.exec(src)) {
@@ -61,8 +92,9 @@ exports.patternArray = function(regex, src) {
   }
   return matches;
 };
+
 // basename, excluding extension
-exports.base = function(filepath) { 
+exports.base = function(filepath) {
   return path.basename(filepath, path.extname(filepath));
 };
 // Remove trailing "s"
