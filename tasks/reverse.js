@@ -15,16 +15,17 @@ var fs   = require('fs');
 
 
 // node_modules
-var cheerio = require('cheerio')
-var _       = require('grunt').util._;
-
+var cheerio = require('cheerio');
+var grunt   = require('grunt');
+var async   = grunt.util.async;
+var _       = grunt.util._;
 
 // Local utils
 var Utils = require('./lib/utils.js');
 
 
-module.exports = function (grunt) {
 
+module.exports = function (grunt) {
 
   grunt.registerMultiTask('reverse', 'Deconstruct your HTML into components.', function () {
 
@@ -47,17 +48,20 @@ module.exports = function (grunt) {
       var dest = fp.dest;
       var src = fp.dest;
 
-      // Concat banner + specified files + footer.
+      // Concat banner + specified files + footer
       fp.src.filter(function(filepath) {
-        // Warn on and remove invalid source files (if nonull was set).
+        // Warn on and remove invalid source files (if nonull was set)
         if (!grunt.file.exists(filepath)) {
           grunt.log.warn('Source file "' + filepath + '" not found.');
+          callback();
           return false;
         } else {
           return true;
         }
       }).map(function(file) {
 
+        // console.log(file);
+        // console.log(filepath);
 
         var $ = cheerio.load(grunt.file.read(file));
 
@@ -65,15 +69,14 @@ module.exports = function (grunt) {
         var basename = path.basename(file, path.extname(file));
         var dirname  = path.dirname(file);
 
-
         /**
          * Components
          */
         if(!options.elements) {
           var components = [];
-          var parent = '.' + (options.parent || 'bs-example');
+          var parent = $('.' + (options.parent || 'bs-example'));
 
-          $(parent).each(function (i, elem, cb) {
+          parent.each(function (i, elem, cb2) {
             components[i] = $(this).html();
 
             var num = 0;
@@ -85,10 +88,13 @@ module.exports = function (grunt) {
                 return $(this).attr('class') !== undefined;
               }).attr('class');
 
-              // Slugify, then remove duplicate name segments.
+              if(name === undefined) {name = 'div';}
+
+              // Slugify and remove duplicate name segments.
               // "nav-nav-tabs" => "nav-tabs"
               var slug = ((_.slugify(name) + i) || (parent + i) || 'element');
               slug = _.unique(slug.split('-')).join('-');
+
 
               // Prettify HTML and add a separator between any sibling components.
               var result = Utils.format(components[i], Utils.sep(slug));
@@ -96,8 +102,8 @@ module.exports = function (grunt) {
               // Write the component to disk.
               grunt.file.write(path.join(dest, basename, slug + '.' + options.ext), result);
             } else {
-              if (cb) {
-                cb(null, true);
+              if (cb2) {
+                cb2(null, true);
               }
               return true;
             }
@@ -106,41 +112,55 @@ module.exports = function (grunt) {
         }
 
 
-        // Attempt to extract reasonable file names.
-        var name;
-        if(basename === 'index') {
-          name = path.basename(dirname);
-        } else {
-          name = basename;
+        if(options.tags && options.tags.length > 0) {
+
+          // Attempt to extract rational file names.
+          var name;
+          if(basename === 'index') {
+            name = path.basename(dirname);
+          } else {
+            name = basename;
+          }
+
+
+          async.forEach(options.tags, function(tag, next) {
+            $(tag).map(function(i, element) {
+              console.log($(this));
+              grunt.log.ok('element:'.yellow, tag);
+
+              var text = $(this).text();
+              var html = $(this).html();
+
+              // Extract component info
+              var metadata = {
+                filename: name,
+                src     : file,
+                dest    : dest,
+                element : tag,
+                html    : html,
+                text    : Utils.stripWhitespace(text)
+              };
+              grunt.log.ok('src:'.yellow, metadata.src);
+
+              // Push metadata into data array
+              data.push(metadata);
+            });
+
+            // Data
+            grunt.file.write(path.join(path.dirname(files.dest), tag.name + '.json'), JSON.stringify(data, null, 2));
+            grunt.log.ok('Data file generated in'.yellow, path.join(dest, basename));
+
+            // HTML sections
+            var destpath = path.join(dest, basename, tag.name + '.hbs');
+            grunt.file.write(destpath, Utils.format($(this).html(), Utils.sep(name)));
+
+            next();
+          });
         }
 
 
-        // var destpath = path.join(dest, basename, name + '.html');
-
-        // grunt.file.write(destpath, Utils.format($(this).html(), Utils.sep(name)));
-        _(options.tags).map(function(tag) {
-          $(tag).each(function(i, element) {
-
-            var title = $(this).text();
-
-            // Extract components from DOM
-            var metadata = {
-              filename: name,
-              src: file,
-              dest: dest,
-              title: Utils.stripWhitespace(title)
-            };
-
-            // Push meta-data into repos array
-            data.push(metadata);
-            grunt.file.write(path.join(path.dirname(files.dest), options.tags + '.json'), JSON.stringify(data, null, 2));
-          });
-        });
-        console.log(data)
-
       });
-    }, function (err) {
-      callback(!err);
     });
+    cb();
   });
 };

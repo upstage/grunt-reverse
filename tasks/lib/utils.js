@@ -58,14 +58,14 @@ var padComponents = function(str) {
  * Format generated HTML
  * @param  {String} src       Unformatted HTML
  * @param  {String} separator The separator to use between sections of joined content.
- * @return {String}     
+ * @return {String}
  */
 exports.format = function(src, sep) {
   src = prettify(src);
   src = condense(src);
   src = padcomments(src);
   src = padComponents(src, sep);
-  src = shave(src)
+  src = shave(src);
   return fixClosingComments(src);
 };
 
@@ -74,14 +74,14 @@ exports.format = function(src, sep) {
  */
 exports.sep = function(str) {
   return '<!--  ' + str + '  -->\n';
-}
+};
 
 /**
- * Create an array of strings that match the 
+ * Create an array of strings that match the
  * given regex pattern.
- * @param  {RegExp} regex 
- * @param  {String} src   
- * @return {Array}       
+ * @param  {RegExp} regex
+ * @param  {String} src
+ * @return {Array}
  */
 exports.patternArray = function(regex, src) {
   // src = require('grunt').file.read(src);
@@ -94,7 +94,7 @@ exports.patternArray = function(regex, src) {
 };
 
 // basename, excluding extension
-exports.base = function(filepath) { 
+exports.base = function(filepath) {
   return path.basename(filepath, path.extname(filepath));
 };
 // Remove trailing "s"
