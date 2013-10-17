@@ -45,6 +45,7 @@ module.exports = function (grunt) {
     grunt.util.async.forEachSeries(files, function(fp, callback) {
       var dest = fp.dest;
       var src = fp.dest;
+      var data = {};
 
       // Concat banner + specified files + footer
       fp.src.filter(function(filepath) {
@@ -122,7 +123,7 @@ module.exports = function (grunt) {
 
 
           async.forEach(options.tags, function(tag, next) {
-            var data = [];
+            data[tag] = data[tag] || [];
             $(tag).map(function(i, element) {
               console.log($(this));
               grunt.log.ok('element:'.yellow, tag);
@@ -142,12 +143,10 @@ module.exports = function (grunt) {
               grunt.log.ok('src:'.yellow, metadata.src);
 
               // Push metadata into data array
-              data.push(metadata);
+              data[tag].push(metadata);
             });
 
             // Data
-            grunt.file.write(path.join(dest, basename, tag + '.json'), JSON.stringify(data, null, 2));
-            grunt.log.ok('Data file generated in'.yellow, path.join(dest, basename));
 
             // HTML sections
             var destpath = path.join(dest, basename, tag.name + '.hbs');
@@ -155,10 +154,17 @@ module.exports = function (grunt) {
 
             next();
           });
+
+          
         }
 
-
       });
+
+      _.forOwn(data, function(metadata, tag) {
+        grunt.file.write(path.join(dest, tag + '.json'), JSON.stringify(metadata, null, 2));
+        grunt.log.ok('Data file generated in'.yellow, path.join(dest, tag + '.json'));
+      });
+
     });
     cb();
   });
