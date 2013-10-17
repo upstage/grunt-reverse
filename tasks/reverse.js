@@ -31,9 +31,7 @@ module.exports = function (grunt) {
 
     var cb = this.async();
     // Merge task-specific and/or target-specific options with these defaults.
-    var options = this.options({
-      tags: []
-    });
+    var options = this.options({});
 
     var files = this.files;
 
@@ -71,7 +69,7 @@ module.exports = function (grunt) {
         /**
          * Components
          */
-        if(!options.elements) {
+        if(!options.tags) {
           var components = [];
           var parent = $('.' + (options.parent || 'bs-example'));
 
@@ -146,14 +144,14 @@ module.exports = function (grunt) {
 
               // Push metadata into data array
               data[tag].push(metadata);
-              content += html;
+              content += Utils.format(html, Utils.sep(name));
             });
 
             // Data
 
             // HTML sections
             var destpath = path.join(dest, basename, tag + '.hbs');
-            grunt.file.write(destpath, Utils.format(content, Utils.sep(name)));
+            grunt.file.write(destpath, content);
 
             next();
           });
