@@ -35,7 +35,7 @@ module.exports = function(grunt) {
       },
       tags: {
         options: {
-          tags: ['head', 'footer', 'title']
+          tags: ['head', 'footer', 'title', 'table']
         },
         files: {
           'tmp/reverse/tags/': ['_demo/**/*.html']

@@ -31,9 +31,7 @@ module.exports = function (grunt) {
 
     var cb = this.async();
     // Merge task-specific and/or target-specific options with these defaults.
-    var options = this.options({
-      tags: []
-    });
+    var options = this.options({});
 
     var files = this.files;
 
@@ -71,44 +69,43 @@ module.exports = function (grunt) {
         /**
          * Components
          */
-        if(!options.elements) {
-          var components = [];
-          var parent = $('.' + (options.parent || 'bs-example'));
+        var components = [];
+        var parent = $('.' + (options.parent || 'bs-example'));
 
-          parent.each(function (i, elem, cb2) {
-            components[i] = $(this).html();
+        parent.each(function (i, elem, cb2) {
+          components[i] = $(this).html();
 
-            var num = 0;
-            var totalComponents = components.length;
-            if (num < totalComponents) {
+          var num = 0;
+          var totalComponents = components.length;
+          if (num < totalComponents) {
 
-              // Search for the first class name of each component
-              var name = $(components[i]).filter(function (i, el) {
-                return $(this).attr('class') !== undefined;
-              }).attr('class');
+            // Search for the first class name of each component
+            var name = $(components[i]).filter(function (i, el) {
+              return $(this).attr('class') !== undefined;
+            }).attr('class');
 
-              if(name === undefined) {name = 'div';}
+            if(name === undefined) {name = 'div';}
 
-              // Slugify and remove duplicate name segments.
-              // "nav-nav-tabs" => "nav-tabs"
-              var slug = ((_.slugify(name) + i) || (parent + i) || 'element');
-              slug = _.unique(slug.split('-')).join('-');
+            // Slugify and remove duplicate name segments.
+            // "nav-nav-tabs" => "nav-tabs"
+            var slug = ((_.slugify(name) + i) || (parent + i) || 'element');
+            slug = _.unique(slug.split('-')).join('-');
 
 
-              // Prettify HTML and add a separator between any sibling components.
-              var result = Utils.format(components[i], Utils.sep(slug));
+            // Prettify HTML and add a separator between any sibling components.
+            var result = Utils.format(components[i], Utils.sep(slug));
 
-              // Write the component to disk.
-              grunt.file.write(path.join(dest, basename, slug + '.' + options.ext), result);
-            } else {
-              if (cb2) {
-                cb2(null, true);
-              }
-              return true;
+            // Write the component to disk.
+            grunt.file.write(path.join(dest, basename, slug + '.' + options.ext), result);
+          } else {
+            if (cb2) {
+              cb2(null, true);
             }
-          });
-          grunt.log.ok('Components generated in'.yellow, path.join(dest, basename));
-        }
+            return true;
+          }
+        });
+        grunt.log.ok('Components generated in'.yellow, path.join(dest, basename));
+
 
 
         if(options.tags && options.tags.length > 0) {
@@ -124,6 +121,8 @@ module.exports = function (grunt) {
 
           async.forEach(options.tags, function(tag, next) {
             data[tag] = data[tag] || [];
+            var content = '';
+
             $(tag).map(function(i, element) {
               console.log($(this));
               grunt.log.ok('element:'.yellow, tag);
@@ -144,18 +143,19 @@ module.exports = function (grunt) {
 
               // Push metadata into data array
               data[tag].push(metadata);
+              content += html;
             });
 
             // Data
 
             // HTML sections
-            var destpath = path.join(dest, basename, tag.name + '.hbs');
-            grunt.file.write(destpath, Utils.format($(this).html(), Utils.sep(name)));
+            var destpath = path.join(dest, basename, tag + '.hbs');
+            grunt.file.write(destpath, Utils.format(content, Utils.sep(name)));
 
             next();
           });
 
-          
+
         }
 
       });
